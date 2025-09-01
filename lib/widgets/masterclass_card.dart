@@ -21,7 +21,7 @@ class MasterClassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap, // Добавлен обработчик нажатия
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

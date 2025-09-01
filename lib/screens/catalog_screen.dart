@@ -4,7 +4,7 @@ import '../data/dummy_data.dart';
 import '../widgets/masterclass_card.dart';
 import '../widgets/filter_widget.dart';
 import '../widgets/sort_widget.dart';
-import 'masterclass_detail_screen.dart'; // Добавьте этот импорт
+import 'masterclass_detail_screen.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
@@ -17,6 +17,8 @@ class CatalogScreenState extends State<CatalogScreen> {
   FilterOptions _currentFilters = FilterOptions();
   SortOption _currentSort = SortOption.dateDesc;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  List<String> _searchSuggestions = [];
 
   List<MasterClass> get _filteredMasterClasses {
     List<MasterClass> result = dummyMasterClasses.where((masterClass) {
@@ -95,6 +97,31 @@ class CatalogScreenState extends State<CatalogScreen> {
     return result;
   }
 
+  void _updateSearchSuggestions(String query) {
+    if (query.isEmpty) {
+      setState(() => _searchSuggestions = []);
+      return;
+    }
+
+    final suggestions = dummyMasterClasses
+        .where((masterClass) =>
+            masterClass.title.toLowerCase().contains(query.toLowerCase()) ||
+            masterClass.description.toLowerCase().contains(query.toLowerCase()))
+        .map((masterClass) => masterClass.title)
+        .toSet() // Убираем дубликаты
+        .toList()
+        .take(5) // Ограничиваем 5 подсказками
+        .toList();
+
+    setState(() => _searchSuggestions = suggestions);
+  }
+
+  void _selectSuggestion(String suggestion) {
+    _searchController.text = suggestion;
+    setState(() => _searchSuggestions = []);
+    _searchFocusNode.unfocus();
+  }
+
   void _openFilters() async {
     final result = await Navigator.of(context).push<FilterOptions>(
       MaterialPageRoute(
@@ -116,6 +143,29 @@ class CatalogScreenState extends State<CatalogScreen> {
     }
   }
 
+  void _openMasterClassDetail(MasterClass masterClass) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MasterClassDetailScreen(masterClass: masterClass),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      _updateSearchSuggestions(_searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredClasses = _filteredMasterClasses;
@@ -131,9 +181,7 @@ class CatalogScreenState extends State<CatalogScreen> {
           SortWidget(
             currentSort: _currentSort,
             onSortChanged: (sort) {
-              setState(() {
-                _currentSort = sort;
-              });
+              setState(() => _currentSort = sort);
             },
           ),
         ],
@@ -142,18 +190,54 @@ class CatalogScreenState extends State<CatalogScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Поиск мастер-классов...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Поиск мастер-классов...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchSuggestions = []);
+                            },
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                 ),
-              ),
-              onChanged: (value) {
-                setState(() {});
-              },
+                if (_searchSuggestions.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Colors.black.withOpacity(0.1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: _searchSuggestions.map((suggestion) {
+                        return ListTile(
+                          title: Text(suggestion),
+                          onTap: () => _selectSuggestion(suggestion),
+                          dense: true,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+              ],
             ),
           ),
           Expanded(
@@ -167,9 +251,7 @@ class CatalogScreenState extends State<CatalogScreen> {
                       final masterClass = filteredClasses[index];
                       return MasterClassCard(
                         masterClass: masterClass,
-                        onTap: () {
-                          // Переход на страницу мастер-класса
-                        },
+                        onTap: () => _openMasterClassDetail(masterClass),
                       );
                     },
                   ),
