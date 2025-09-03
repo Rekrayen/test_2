@@ -5,19 +5,49 @@ import 'catalog_screen.dart';
 import 'favorites_screen.dart';
 import '../services/cart_manager.dart';
 import '../services/favorite_manager.dart';
+import '../models/user.dart'; // ДОБАВЬТЕ ИМПОРТ
+import 'profile/user_profile_screen.dart'; // ДОБАВЬТЕ ИМПОРТ
+import 'profile/seller_profile_screen.dart'; // ДОБАВЬТЕ ИМПОРТ
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  void _navigateToProfile(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
+
+    if (user == null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => user.isSeller
+              ? const SellerProfileScreen()
+              : const UserProfileScreen(),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Мастер-классы'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        // ИКОНКА ИЗБРАННОГО В APP BAR
         actions: [
+          // ИКОНКА ЛИЧНОГО КАБИНЕТА (ДОБАВЬТЕ ЭТУ КНОПКУ)
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => _navigateToProfile(context),
+          ),
+          // Остальные иконки без изменений
           Consumer<FavoriteManager>(
             builder: (context, favorites, child) => Stack(
               children: [
@@ -57,7 +87,6 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          // ИКОНКА КОРЗИНЫ
           Consumer<CartManager>(
             builder: (context, cart, child) => Stack(
               children: [
@@ -181,7 +210,6 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 10),
             TextButton(
               onPressed: () {
-                // Продолжить как гость
                 Navigator.of(context).push(
                   MaterialPageRoute(
                       builder: (context) => const CatalogScreen()),

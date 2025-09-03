@@ -5,6 +5,7 @@ import 'screens/home_screen.dart';
 import 'services/cart_manager.dart';
 import 'services/favorite_manager.dart';
 import 'services/theme_manager.dart';
+import 'models/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (ctx) => AuthService()),
         ChangeNotifierProvider(create: (ctx) => CartManager()),
         ChangeNotifierProvider(create: (ctx) => FavoriteManager()),
         ChangeNotifierProvider(create: (ctx) => ThemeManager()),

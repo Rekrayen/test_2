@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/user.dart';
 import '../../services/theme_manager.dart';
 import '../auth/login_screen.dart';
@@ -20,10 +21,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    final user = AuthService.currentUser;
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
-    _phoneController = TextEditingController(text: '+7 (999) 123-45-67');
+    _phoneController = TextEditingController(text: user?.phone ?? '');
   }
 
   @override
@@ -34,12 +36,35 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     super.dispose();
   }
 
+  void _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user != null) {
+        final updatedUser = user.copyWith(avatarUrl: pickedFile.path);
+        authService.updateUser(updatedUser);
+      }
+    }
+  }
+
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Реализовать сохранение данных профиля
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Профиль сохранен')),
-      );
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user != null) {
+        final updatedUser = user.copyWith(
+          name: _nameController.text,
+          phone: _phoneController.text,
+        );
+        authService.updateUser(updatedUser);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Профиль сохранен')),
+        );
+      }
     }
   }
 
@@ -92,7 +117,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   }
 
   void _logout() {
-    AuthService.logout();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    authService.logout();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
@@ -101,7 +127,8 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final user = AuthService.currentUser;
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -138,9 +165,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                           child: IconButton(
                             icon: const Icon(Icons.camera_alt,
                                 size: 20, color: Colors.white),
-                            onPressed: () {
-                              // TODO: Реализовать загрузку фото
-                            },
+                            onPressed: _pickImage,
                           ),
                         ),
                       ),

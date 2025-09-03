@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // ДОБАВЬТЕ ЭТОТ ИМПОРТ
 import '../../models/user.dart';
 import '../profile/user_profile_screen.dart';
 import '../profile/seller_profile_screen.dart';
@@ -21,7 +22,10 @@ class LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    final success = await AuthService.login(
+    final authService =
+        Provider.of<AuthService>(context, listen: false); // ИЗМЕНИТЕ
+    final success = await authService.login(
+      // ИЗМЕНИТЕ
       _emailController.text,
       _passwordController.text,
     );
@@ -29,10 +33,11 @@ class LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (success && AuthService.currentUser != null) {
+    if (success && authService.currentUser != null) {
+      // ИЗМЕНИТЕ
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => AuthService.currentUser!.isSeller
+          builder: (context) => authService.currentUser!.isSeller // ИЗМЕНИТЕ
               ? const SellerProfileScreen()
               : const UserProfileScreen(),
         ),

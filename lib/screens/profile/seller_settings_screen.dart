@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/user.dart';
 import '../../services/theme_manager.dart';
 import '../auth/login_screen.dart';
-import 'package:provider/provider.dart';
 
 class SellerSettingsScreen extends StatefulWidget {
   const SellerSettingsScreen({super.key});
@@ -24,16 +25,16 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    final user = AuthService.currentUser;
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
-    _phoneController = TextEditingController(text: '+7 (999) 123-45-67');
-    _schoolController =
-        TextEditingController(text: 'Студия творчества "Арт-Хаб"');
-    _descriptionController = TextEditingController(
-        text: 'Профессиональные мастер-классы по живописи и кулинарии');
-    _websiteController = TextEditingController(text: 'www.art-hub.ru');
-    _socialController = TextEditingController(text: '@arthub');
+    _phoneController = TextEditingController(text: user?.phone ?? '');
+    _schoolController = TextEditingController(text: user?.schoolName ?? '');
+    _descriptionController =
+        TextEditingController(text: user?.description ?? '');
+    _websiteController = TextEditingController(text: user?.website ?? '');
+    _socialController = TextEditingController(text: user?.socialMedia ?? '');
   }
 
   @override
@@ -48,12 +49,53 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
     super.dispose();
   }
 
+  void _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user != null) {
+        final updatedUser = user.copyWith(avatarUrl: pickedFile.path);
+        authService.updateUser(updatedUser);
+      }
+    }
+  }
+
+  void _pickBanner() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user != null) {
+        final updatedUser = user.copyWith(bannerUrl: pickedFile.path);
+        authService.updateUser(updatedUser);
+      }
+    }
+  }
+
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Реализовать сохранение данных профиля
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Профиль сохранен')),
-      );
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user != null) {
+        final updatedUser = user.copyWith(
+          name: _nameController.text,
+          phone: _phoneController.text,
+          schoolName: _schoolController.text,
+          description: _descriptionController.text,
+          website: _websiteController.text,
+          socialMedia: _socialController.text,
+        );
+        authService.updateUser(updatedUser);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Профиль сохранен')),
+        );
+      }
     }
   }
 
@@ -106,7 +148,8 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
   }
 
   void _logout() {
-    AuthService.logout();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    authService.logout();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
@@ -115,7 +158,8 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final user = AuthService.currentUser;
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,10 +179,15 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(12),
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/logo.png'),
-                          fit: BoxFit.cover,
-                        ),
+                        image: user.bannerUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(user.bannerUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : const DecorationImage(
+                                image: AssetImage('assets/images/logo.png'),
+                                fit: BoxFit.cover,
+                              ),
                       ),
                       child: Stack(
                         children: [
@@ -153,9 +202,7 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
                               child: IconButton(
                                 icon: const Icon(Icons.camera_alt,
                                     size: 20, color: Colors.white),
-                                onPressed: () {
-                                  // TODO: Реализовать загрузку баннера
-                                },
+                                onPressed: _pickBanner,
                               ),
                             ),
                           ),
@@ -188,9 +235,7 @@ class _SellerSettingsScreenState extends State<SellerSettingsScreen> {
                             child: IconButton(
                               icon: const Icon(Icons.camera_alt,
                                   size: 20, color: Colors.white),
-                              onPressed: () {
-                                // TODO: Реализовать загрузку фото
-                              },
+                              onPressed: _pickImage,
                             ),
                           ),
                         ),

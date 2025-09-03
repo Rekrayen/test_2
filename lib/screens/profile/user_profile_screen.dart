@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/user.dart';
 import '../auth/login_screen.dart';
-import 'user_settings_screen.dart'; // Добавьте этот импорт
+import 'user_settings_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthService.currentUser;
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -17,7 +19,7 @@ class UserProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () {
-              AuthService.logout();
+              authService.logout();
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
@@ -41,29 +43,38 @@ class UserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(User user) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: Colors.grey[300],
-          child: const Icon(Icons.person, size: 40, color: Colors.grey),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<AuthService>(
+      builder: (context, authService, child) {
+        return Row(
           children: [
-            Text(
-              user.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.grey[300],
+              backgroundImage:
+                  user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+              child: user.avatarUrl == null
+                  ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                  : null,
             ),
-            Text(user.email),
-            Text(
-              'Покупатель',
-              style: TextStyle(color: Colors.grey[600]),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.name,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(user.email),
+                Text(
+                  'Покупатель',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
