@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/catalog_screen.dart'; // ✅ ОСТАВЬТЕ этот импорт
+// import 'screens/home_screen.dart'; // ❌ УДАЛИТЕ эту строку
 import 'services/cart_manager.dart';
 import 'services/favorite_manager.dart';
 import 'services/theme_manager.dart';
@@ -29,9 +30,9 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeManager>(
         builder: (context, themeManager, child) {
           return MaterialApp(
-            title: 'Тест приложения',
+            title: 'Мастер-классы',
             theme: ThemeData(
-              useMaterial3: true, // ПЕРЕМЕЩАЕМ ВНУТРЬ КОНСТРУКТОРА
+              useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               appBarTheme: const AppBarTheme(
                 backgroundColor: Colors.blue,
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
             darkTheme: ThemeData(
-              useMaterial3: true, // ПЕРЕМЕЩАЕМ ВНУТРЬ КОНСТРУКТОРА
+              useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.blue,
                 brightness: Brightness.dark,
@@ -50,7 +51,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
             themeMode: themeManager.themeMode,
-            home: const HomeScreen(),
+            home: const CatalogScreen(), // ✅ ИЗМЕНИТЕ на CatalogScreen
             debugShowCheckedModeBanner: false,
           );
         },

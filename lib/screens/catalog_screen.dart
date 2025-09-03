@@ -7,7 +7,13 @@ import '../widgets/masterclass_card.dart';
 import '../widgets/sort_widget.dart';
 import 'masterclass_detail_screen.dart';
 import '../services/cart_manager.dart';
+import '../services/favorite_manager.dart';
 import 'cart_screen.dart';
+import 'favorites_screen.dart';
+import 'auth/login_screen.dart';
+import 'profile/user_profile_screen.dart';
+import 'profile/seller_profile_screen.dart';
+import '../models/user.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
@@ -233,12 +239,83 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
+  void _navigateToProfile(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
+
+    if (user == null) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => const LoginScreen()));
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => user.isSeller
+              ? const SellerProfileScreen()
+              : const UserProfileScreen(),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Каталог мастер-классов'),
+        title: const Text('Мастер-классы'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
         actions: [
+          // ИКОНКА ПРОФИЛЯ
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => _navigateToProfile(context),
+          ),
+          // ИКОНКА ИЗБРАННОГО
+          Consumer<FavoriteManager>(
+            builder: (context, favorites, child) => Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => const FavoritesScreen(),
+                      ),
+                    );
+                  },
+                ),
+                if (favorites.favoriteIds.isNotEmpty)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        favorites.favoriteIds.length.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // ИКОНКА КОРЗИНЫ
           Consumer<CartManager>(
             builder: (context, cart, child) => Stack(
               children: [
@@ -281,6 +358,68 @@ class _CatalogScreenState extends State<CatalogScreen> {
       ),
       body: Column(
         children: [
+          // ПРИВЕТСТВИЕ ДЛЯ НЕАВТОРИЗОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ
+          if (user == null)
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.blue.shade50,
+              child: Column(
+                children: [
+                  const Text(
+                    'Добро пожаловать!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Найдите свой идеальный мастер-класс',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: const Text('Войти'),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton(
+                        onPressed: () {
+                          // Продолжить как гость
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: const Text('Гость'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          // ПОИСК И ФИЛЬТРЫ
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
