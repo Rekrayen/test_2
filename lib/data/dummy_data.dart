@@ -68,15 +68,15 @@ final List<MasterClass> dummyMasterClasses = [
 ];
 
 class FilterOptions {
-  final List<String> categories;
-  final double? minPrice;
-  final double? maxPrice;
-  final List<String> formats;
-  final DateTime? minDate;
-  final DateTime? maxDate;
-  final List<String> difficulties;
-  final List<String> languages;
-  final double minRating;
+  List<String> categories;
+  double? minPrice;
+  double? maxPrice;
+  List<String> formats;
+  DateTime? minDate;
+  DateTime? maxDate;
+  List<String> difficulties;
+  List<String> languages;
+  double minRating;
 
   FilterOptions({
     this.categories = const [],

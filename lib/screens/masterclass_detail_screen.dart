@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/masterclass.dart';
+import '../services/cart_manager.dart';
+import 'cart_screen.dart';
 
 class MasterClassDetailScreen extends StatelessWidget {
   final MasterClass masterClass;
@@ -17,6 +20,47 @@ class MasterClassDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Детали мастер-класса'),
+        // ИКОНКА КОРЗИНЫ В APP BAR - ДОБАВЛЕНО
+        actions: [
+          Consumer<CartManager>(
+            builder: (context, cart, child) => Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (ctx) => const CartScreen()),
+                    );
+                  },
+                ),
+                if (cart.itemCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        cart.itemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -140,6 +184,33 @@ class MasterClassDetailScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   'Записаться на мастер-класс',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // КНОПКА "ДОБАВИТЬ В КОРЗИНУ" - ДОБАВЛЕНО
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Provider.of<CartManager>(context, listen: false)
+                      .addItem(masterClass);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Добавлено в корзину: ${masterClass.title}'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text(
+                  'Добавить в корзину',
                   style: TextStyle(fontSize: 16),
                 ),
               ),

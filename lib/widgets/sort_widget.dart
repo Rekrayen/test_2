@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum SortOption { dateAsc, dateDesc, popularity, rating, priceAsc, priceDesc }
+enum SortOption { date, price, rating }
 
 class SortWidget extends StatelessWidget {
   final SortOption currentSort;
@@ -14,33 +14,38 @@ class SortWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<SortOption>(
-      icon: const Icon(Icons.sort),
-      onSelected: onSortChanged,
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
-        const PopupMenuItem<SortOption>(
-          value: SortOption.dateAsc,
-          child: Text('Дата (сначала старые)'),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        RadioListTile<SortOption>(
+          title: const Text('По дате'),
+          value: SortOption.date,
+          groupValue: currentSort,
+          onChanged: (value) {
+            if (value != null) {
+              onSortChanged(value);
+            }
+          },
         ),
-        const PopupMenuItem<SortOption>(
-          value: SortOption.dateDesc,
-          child: Text('Дата (сначала новые)'),
+        RadioListTile<SortOption>(
+          title: const Text('По цене'),
+          value: SortOption.price,
+          groupValue: currentSort,
+          onChanged: (value) {
+            if (value != null) {
+              onSortChanged(value);
+            }
+          },
         ),
-        const PopupMenuItem<SortOption>(
-          value: SortOption.popularity,
-          child: Text('Популярность'),
-        ),
-        const PopupMenuItem<SortOption>(
+        RadioListTile<SortOption>(
+          title: const Text('По рейтингу'),
           value: SortOption.rating,
-          child: Text('Рейтинг'),
-        ),
-        const PopupMenuItem<SortOption>(
-          value: SortOption.priceAsc,
-          child: Text('Цена (дешевые)'),
-        ),
-        const PopupMenuItem<SortOption>(
-          value: SortOption.priceDesc,
-          child: Text('Цена (дорогие)'),
+          groupValue: currentSort,
+          onChanged: (value) {
+            if (value != null) {
+              onSortChanged(value);
+            }
+          },
         ),
       ],
     );
