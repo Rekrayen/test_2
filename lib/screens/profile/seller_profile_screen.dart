@@ -3,6 +3,7 @@ import '../../models/user.dart';
 import '../auth/login_screen.dart';
 import 'add_masterclass_screen.dart';
 import '../catalog_screen.dart';
+import 'seller_settings_screen.dart'; // Добавьте этот импорт
 
 class SellerProfileScreen extends StatelessWidget {
   const SellerProfileScreen({super.key});
@@ -70,10 +71,7 @@ class SellerProfileScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Text(user.email),
-            Text(
-              'Продавец',
-              style: TextStyle(color: Colors.green[700]),
-            ),
+            Text('Продавец', style: TextStyle(color: Colors.green[700])),
           ],
         ),
       ],
@@ -86,22 +84,28 @@ class SellerProfileScreen extends StatelessWidget {
       children: [
         Column(
           children: [
-            Text('8',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              '8',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             Text('Мастер-классов'),
           ],
         ),
         Column(
           children: [
-            Text('124',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              '124',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             Text('Учеников'),
           ],
         ),
         Column(
           children: [
-            Text('4.8',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              '4.8',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             Text('Рейтинг'),
           ],
         ),
@@ -135,6 +139,17 @@ class SellerProfileScreen extends StatelessWidget {
           icon: const Icon(Icons.analytics),
           label: const Text('Статистика'),
         ),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SellerSettingsScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.settings),
+          label: const Text('Настройки'),
+        ),
       ],
     );
   }
@@ -165,9 +180,7 @@ class SellerProfileScreen extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => CatalogScreen(),
-              ),
+              MaterialPageRoute(builder: (context) => const CatalogScreen()),
             );
           },
           child: const Text('Посмотреть все мои мастер-классы'),
@@ -175,4 +188,4 @@ class SellerProfileScreen extends StatelessWidget {
       ],
     );
   }
-} // ← ЭТА закрывающая скобка должна быть в конце файла
+}

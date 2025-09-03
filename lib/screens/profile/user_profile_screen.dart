@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../auth/login_screen.dart';
+import 'user_settings_screen.dart'; // Добавьте этот импорт
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -116,7 +117,12 @@ class UserProfileScreen extends StatelessWidget {
         ListTile(
           leading: const Icon(Icons.settings),
           title: const Text('Настройки'),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (context) => const UserSettingsScreen()),
+            );
+          },
         ),
       ],
     );

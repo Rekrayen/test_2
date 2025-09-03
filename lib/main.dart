@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'services/cart_manager.dart';
 import 'services/favorite_manager.dart';
+import 'services/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,19 +22,36 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (ctx) => CartManager()),
         ChangeNotifierProvider(create: (ctx) => FavoriteManager()),
+        ChangeNotifierProvider(create: (ctx) => ThemeManager()),
       ],
-      child: MaterialApp(
-        title: 'Тест приложения',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-          ),
-        ),
-        home: const HomeScreen(),
-        debugShowCheckedModeBanner: false,
+      child: Consumer<ThemeManager>(
+        builder: (context, themeManager, child) {
+          return MaterialApp(
+            title: 'Тест приложения',
+            theme: ThemeData(
+              useMaterial3: true, // ПЕРЕМЕЩАЕМ ВНУТРЬ КОНСТРУКТОРА
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            darkTheme: ThemeData(
+              useMaterial3: true, // ПЕРЕМЕЩАЕМ ВНУТРЬ КОНСТРУКТОРА
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.dark,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            themeMode: themeManager.themeMode,
+            home: const HomeScreen(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }
